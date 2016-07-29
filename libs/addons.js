@@ -3,14 +3,14 @@ var unzip = require( 'unzip' );
 var path = require( 'path' );
 var async = require( 'async' );
 
-var wow_dir = process.env['WOWPATH'] || '/Applications/World of Warcraft';
-var addons_dir = path.join( wow_dir , 'Interface' , 'AddOns' );
+var wow_path = process.env['WOWPATH'] || '/Applications/World of Warcraft';
+var addons_path = path.join( wow_path , 'Interface' , 'AddOns' );
 
 module.exports = function( _source ) {
   var addons_details = {};
 
   function load_details( _cb ) {
-    var data = fs.readFileSync( path.join( addons_dir , 'wam.json' ) );
+    var data = fs.readFileSync( path.join( addons_path , 'wam.json' ) );
     if ( !data ) {
       // file not found
     } else {
@@ -23,7 +23,7 @@ module.exports = function( _source ) {
   }
 
   function save_details(  ) {
-    fs.writeFile( path.join( addons_dir , 'wam.json' ) , JSON.stringify( addons_details , null , 2 ) , ( _err ) => {
+    fs.writeFile( path.join( addons_path , 'wam.json' ) , JSON.stringify( addons_details , null , 2 ) , ( _err ) => {
       return;
     } );
   }
@@ -35,7 +35,7 @@ module.exports = function( _source ) {
     fs.createReadStream( _zipfile )
       .pipe( unzip.Parse() )
       .on('entry' , ( _entry ) => {
-        var output_filename = path.join( addons_dir , _entry.path );
+        var output_filename = path.join( addons_path , _entry.path );
         var addon_dir = _entry.path.split( path.sep )[0];
         if ( dirs.indexOf( addon_dir ) === -1 ) {
           dirs.push( addon_dir );
@@ -87,7 +87,7 @@ module.exports = function( _source ) {
       var dirs = addons_details[ _addon_name ].local_dirs;
       for( var i in dirs ) {
         console.log( 'Removing' , dirs[ i ] );
-        fs.remove( path.join( addons_dir , dirs[ i ] ) );
+        fs.remove( path.join( addons_path , dirs[ i ] ) );
       }
       af_remove( addons_details[ _addon_name ] );
       _cb( null );
