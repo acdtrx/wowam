@@ -6,7 +6,7 @@ from the command line from the curse.com website.
 You need a working node 4.x environment. Once you have that, use
 
 ```
-npm install -g wam
+npm install -g wowam
 ```
 
 This will install the wam tool in your path (osx: /usr/local/bin) and allow
