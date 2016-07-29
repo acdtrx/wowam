@@ -17,5 +17,6 @@
   },
   "bin": {
     "wam": "./index.js"
-  }
+  },
+  "license": "SEE LICENSE IN LICENSE"
 }
