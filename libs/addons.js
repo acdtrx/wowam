@@ -10,15 +10,12 @@ module.exports = function( _source ) {
   var addons_details = {};
 
   function load_details( _cb ) {
-    var data = fs.readFileSync( path.join( addons_path , 'wam.json' ) );
-    if ( !data ) {
-      // file not found
-    } else {
-      try {
-        addons_details = JSON.parse( data );
-      } catch( e ) {
-        addons_details = {};
-      }
+    try {
+      var data = fs.readFileSync( path.join( addons_path , 'wam.json' ) );
+      addons_details = JSON.parse( data );
+    } catch( e ) {
+      // file not found or JSON parse failed
+      addons_details = {};
     }
   }
 
