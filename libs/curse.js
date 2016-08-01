@@ -1,6 +1,5 @@
 var fs = require( 'fs' );
 var path = require( 'path' );
-var os = require( 'os' );
 
 var request = require( 'request' ).defaults( { jar : true } );
 
@@ -41,7 +40,9 @@ var api = {
           return _cb( { code: -1 , desc: 'Addon not found.' } );
         } else {
           // parse the body
-          var details = {};
+          var details = {
+            source: 'curse'
+          };
           details.key = _name.toLowerCase();
           get_addon_meta( _body , details );
           get_addon_dl( _body , details );
@@ -54,24 +55,14 @@ var api = {
     } );
   },
 
-  download: function( _name , _dest , _cb ) {
-    api.get_details( _name , ( _err , _data ) => {
-      if ( _err ) {
-        return _cb( _err );
-      } else {
-        var download_name = path.join( _dest , _data.name + '-' + _data.version + '.zip' );
-        _data.local_file = download_name;
-        var output = fs.createWriteStream( download_name );
-        output.on( 'close' , () => {
-          _cb( null , _data );
-        } );
-        request( _data.link ).pipe( output );
-      }
+  download: function( _addon , _dest , _cb ) {
+    var download_name = path.join( _dest , _addon.name + '-' + _addon.version + '.zip' );
+    _addon.local_file = download_name;
+    var output = fs.createWriteStream( download_name );
+    output.on( 'close' , () => {
+      _cb( null , _addon );
     } );
-  },
-
-  download_tmp: function( _name , _cb ) {
-    api.download( _name , os.tmpdir() , _cb );
+    request( _addon.link ).pipe( output );
   }
 };
 
