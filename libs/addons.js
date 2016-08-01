@@ -10,22 +10,16 @@ module.exports = function( _source ) {
   var addons_details = {};
 
   function load_details( _cb ) {
-    var data = fs.readFileSync( path.join( addons_path , 'wam.json' ) );
-    if ( !data ) {
+    try {
+      addons_details = fs.readJSONSync( wam_path , { throws: false } );
+    } catch( e ) {
       // file not found
-    } else {
-      try {
-        addons_details = JSON.parse( data );
-      } catch( e ) {
-        addons_details = {};
-      }
+      addons_details = {};
     }
   }
 
   function save_details(  ) {
-    fs.writeFile( path.join( addons_path , 'wam.json' ) , JSON.stringify( addons_details , null , 2 ) , ( _err ) => {
-      return;
-    } );
+    fs.writeJSON( wam_path , addons_details , {spaces: 2} , () => 0 );
   }
 
   load_details( );
