@@ -29,13 +29,17 @@ module.exports = function( _source ) {
     fs.createReadStream( _zipfile )
       .pipe( unzip.Parse() )
       .on('entry' , ( _entry ) => {
-        var output_filename = path.join( addons_path , _entry.path );
-        var addon_dir = _entry.path.split( path.sep )[0];
-        if ( dirs.indexOf( addon_dir ) === -1 ) {
-          dirs.push( addon_dir );
+        if ( _entry.type === 'File' ) {
+          var output_filename = path.join( addons_path , _entry.path );
+          var addon_dir = _entry.path.split( path.sep )[0];
+          if ( dirs.indexOf( addon_dir ) === -1 ) {
+            dirs.push( addon_dir );
+          }
+          fs.ensureDirSync( path.dirname( output_filename ) );
+          _entry.pipe( fs.createWriteStream( output_filename ) );
+        } else {
+          _entry.autodrain();
         }
-        fs.ensureDirSync( path.dirname( output_filename ) );
-        _entry.pipe( fs.createWriteStream( output_filename ) );
       } )
       .on( 'close' , () => {
         _cb( null , dirs );
