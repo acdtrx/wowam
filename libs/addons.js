@@ -3,6 +3,7 @@ var unzip = require( 'unzip' );
 var path = require( 'path' );
 var os = require( 'os' );
 var async = require( 'async' );
+var MS = require( 'multiline-status' );
 
 var wow_path = process.env['WOWPATH'] || '/Applications/World of Warcraft';
 var addons_path = path.join( wow_path , 'Interface' , 'AddOns' );
@@ -10,6 +11,8 @@ var wam_path = path.join( addons_path , 'wam.json' );
 
 module.exports = function( _source ) {
   var addons_details = [];
+
+  var status = new MS();
 
   function load_details( _cb ) {
     try {
@@ -49,31 +52,42 @@ module.exports = function( _source ) {
   }
 
   function _install( _addon , _cb ) {
+    status.set_line( _addon.key , _addon.name , 'Downloading' );
     _source.download( _addon , os.tmpdir() , ( _err , _addon_data ) => {
       if ( _err ) {
         return _cb( _err );
       } else {
-        console.log( 'Downloaded' , _addon_data.name , _addon_data.version );
+        status.set_status( _addon.key , 'Downloaded' );
         // install it
         _extract( _addon_data.local_file , ( _err , _dirs ) => {
           _addon_data.local_dirs = _dirs;
           fs.remove( _addon_data.local_file );
           af_update( _addon_data );
-          console.log( 'Installed' , _addon_data.name , _addon_data.version );
+          status.set_status( _addon.key , 'Installed ' + _addon_data.version );
           _cb( null );
         } );
       }
     } );
   }
 
+  function _remove_addon( _addon , _cb ) {
+    async.each( _addon.local_dirs , ( _dir , _cb ) => {
+      fs.remove( path.join( addons_path , _dir ) , _cb );
+    } , _cb );
+  }
+
   function _uninstall( _addon , _cb ) {
-    var dirs = _addon.local_dirs;
-    for( var i in dirs ) {
-      console.log( 'Removing' , dirs[ i ] );
-      fs.remove( path.join( addons_path , dirs[ i ] ) );
-    }
-    af_remove( _addon );
-    _cb( null );
+    _remove_addon( _addon , () => {
+      af_remove( _addon );
+      _cb( null );
+    } );
+  }
+
+  function _update( _addon , _cb ) {
+    _remove_addon( _addon , ( _err ) => {
+      _addon.local_dirs = [];
+      _install( _addon , _cb );
+    } );
   }
 
   function af_find_idx( _name ) {
@@ -131,20 +145,31 @@ module.exports = function( _source ) {
     _source.get_details( _name , _cb );
   }
 
+  api.list = function( _cb ) {
+    for( var i in addons_details ) {
+      var addon = addons_details[ i ];
+      status.set_line( addon.key , addon.name , addon.version );
+    }
+  }
+
   api.update_all = function( _cb ) {
+    for( var i in addons_details ) {
+      var addon = addons_details[ i ];
+      status.set_line( addon.key , addon.name , 'Waiting...' );
+    }
     async.eachSeries( addons_details , ( _orig_data , _cb ) => {
+      status.set_status( _orig_data.key , 'Checking...' );
       _source.get_details( _orig_data.key , ( _err , _addon_data ) => {
         if ( _err ) {
+          status.set_status( _orig_data.key , 'error.' );
           _cb( _err );
         } else {
           if ( _orig_data.version === _addon_data.version ) {
-            console.log( _orig_data.name , 'up to date' );
+            status.set_status( _orig_data.key , 'up to date' );
             _cb( null );
           } else {
-            console.log( _orig_data.name , _addon_data.version , 'available' );
-            _uninstall( _addon_data , ( _err ) => {
-              _install( _addon_data , _cb );
-            } );
+            status.set_status( _orig_data.key , _addon_data.version + ' available' );
+            _update( _addon_data , _cb );
           }
         }
       } );

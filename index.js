@@ -56,6 +56,14 @@ program
     } );
   } );
 
+program
+  .command( 'list' )
+  .action( ( _options ) => {
+    addons.list( ( _err ) => {
+
+    } );
+  } );
+
 
 
 program.parse( process.argv );

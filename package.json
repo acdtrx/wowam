@@ -1,19 +1,31 @@
 {
   "name": "wowam",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "WoW Addons Manager",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Alex NOVAC <acdtrx@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/acdtrx/wowam.git"
+  },
   "dependencies": {
     "async": "^2.0.1",
     "commander": "^2.9.0",
     "fs-extra": "^0.30.0",
+    "multiline-status": "^0.1.0",
     "request": "^2.74.0",
     "unzip": "^0.1.11"
   },
+  "keywords": [
+    "cli",
+    "wow",
+    "addon",
+    "management",
+    "World of Warcraft"
+  ],
   "bin": {
     "wam": "./index.js",
     "wowam": "./index.js"
