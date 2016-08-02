@@ -1,7 +1,7 @@
 var fs = require( 'fs' );
 var path = require( 'path' );
 
-var request = require( 'request' ).defaults( { jar : true } );
+var request = require( 'superagent' );
 
 function get_addon_meta( _body , _details ) {
   var adr = /<span itemprop="title">([^<]+)<\/span>/g;
@@ -33,7 +33,7 @@ function get_addon_dl( _body , _details ) {
 var api = {
   get_details: function( _name , _cb ) {
     var download_page_url = 'http://mods.curse.com/addons/wow/' + _name + '/download';
-    request( download_page_url , ( _err , _response , _body ) => {
+    request( download_page_url , ( _err , _response ) => {
       if ( _response ) {
         if ( _response.statusCode !== 200 ) {
           // addon not found
@@ -44,8 +44,8 @@ var api = {
             source: 'curse'
           };
           details.key = _name.toLowerCase();
-          get_addon_meta( _body , details );
-          get_addon_dl( _body , details );
+          get_addon_meta( _response.text , details );
+          get_addon_dl( _response.text , details );
 
           return _cb( null , details );
         }

@@ -1,6 +1,6 @@
 {
   "name": "wowam",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "WoW Addons Manager",
   "main": "index.js",
   "scripts": {
@@ -16,7 +16,7 @@
     "commander": "^2.9.0",
     "fs-extra": "^0.30.0",
     "multiline-status": "^0.1.0",
-    "request": "^2.74.0",
+    "superagent": "^2.1.0",
     "unzip": "^0.1.11"
   },
   "keywords": [

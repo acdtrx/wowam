@@ -157,7 +157,7 @@ module.exports = function( _source ) {
       var addon = addons_details[ i ];
       status.set_line( addon.key , addon.name , 'Waiting...' );
     }
-    async.eachSeries( addons_details , ( _orig_data , _cb ) => {
+    async.each( addons_details , ( _orig_data , _cb ) => {
       status.set_status( _orig_data.key , 'Checking...' );
       _source.get_details( _orig_data.key , ( _err , _addon_data ) => {
         if ( _err ) {
