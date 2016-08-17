@@ -3,7 +3,7 @@ var unzip = require( 'unzip' );
 var path = require( 'path' );
 var os = require( 'os' );
 var async = require( 'async' );
-var MS = require( 'multiline-status' );
+var output = require( './output.js' );
 
 var wow_path = process.env['WOWPATH'] || '/Applications/World of Warcraft';
 var addons_path = path.join( wow_path , 'Interface' , 'AddOns' );
@@ -11,8 +11,6 @@ var wam_path = path.join( addons_path , 'wam.json' );
 
 module.exports = function( _source ) {
   var addons_details = [];
-
-  var status = new MS();
 
   function load_details( _cb ) {
     try {
@@ -52,18 +50,18 @@ module.exports = function( _source ) {
   }
 
   function _install( _addon , _cb ) {
-    status.set_line( _addon.key , _addon.name , 'Downloading' );
+    output.state( _addon.key , 'Downloading' );
     _source.download( _addon , os.tmpdir() , ( _err , _addon_data ) => {
       if ( _err ) {
         return _cb( _err );
       } else {
-        status.set_status( _addon.key , 'Downloaded' );
+        output.state( _addon.key , 'Downloaded' );
         // install it
         _extract( _addon_data.local_file , ( _err , _dirs ) => {
           _addon_data.local_dirs = _dirs;
           fs.remove( _addon_data.local_file );
           af_update( _addon_data );
-          status.set_status( _addon.key , 'Installed ' + _addon_data.version );
+          output.state( _addon.key , 'Installed ' + _addon_data.version );
           _cb( null );
         } );
       }
@@ -128,6 +126,7 @@ module.exports = function( _source ) {
   api.install = function( _name , _cb ) {
     _source.get_details( _name , ( _err , _addon ) => {
       if ( _err ) { return _cb( _err ); }
+      output.setup( _addon.key , _addon.name , _addon.version );
       _install( _addon , _cb );
     } );
   }
@@ -148,27 +147,28 @@ module.exports = function( _source ) {
   api.list = function( _cb ) {
     for( var i in addons_details ) {
       var addon = addons_details[ i ];
-      status.set_line( addon.key , addon.name , addon.version );
+      output.setup( addon.key , addon.name , addon.version );
+      output.state( addon.key , 'Installed' );
     }
   }
 
   api.update_all = function( _cb ) {
     for( var i in addons_details ) {
       var addon = addons_details[ i ];
-      status.set_line( addon.key , addon.name , 'Waiting...' );
+      output.setup( addon.key , addon.name , addon.version );
     }
     async.each( addons_details , ( _orig_data , _cb ) => {
-      status.set_status( _orig_data.key , 'Checking...' );
+      output.state( _orig_data.key , 'Checking...' );
       _source.get_details( _orig_data.key , ( _err , _addon_data ) => {
         if ( _err ) {
-          status.set_status( _orig_data.key , 'error.' );
+          output.state( _orig_data.key , 'error.' );
           _cb( _err );
         } else {
           if ( _orig_data.version === _addon_data.version ) {
-            status.set_status( _orig_data.key , 'up to date' );
+            output.state( _orig_data.key , 'up to date' );
             _cb( null );
           } else {
-            status.set_status( _orig_data.key , _addon_data.version + ' available' );
+            output.state( _orig_data.key , _addon_data.version + ' available' );
             _update( _addon_data , _cb );
           }
         }
