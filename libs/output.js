@@ -31,7 +31,7 @@ function af_remove( _addon_data ) {
 var output = new sr( function( _out , _params ) {
   _out( columnify(
     addons_states , {
-    columns: ['name' , 'version' , 'state']
+    columns: ['name' , 'key' , 'version' , 'state']
   } ) + '\n' );
 } );
 
