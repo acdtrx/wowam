@@ -1,5 +1,5 @@
 var fs = require( 'fs-extra' );
-var unzip = require( 'unzip' );
+var unzip = require( 'node-unzip-2' );
 var path = require( 'path' );
 var os = require( 'os' );
 var async = require( 'async' );
