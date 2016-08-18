@@ -77,6 +77,7 @@ module.exports = function( _source ) {
   function _uninstall( _addon , _cb ) {
     _remove_addon( _addon , () => {
       af_remove( _addon );
+      output.state( _addon.key , 'Uninstalled' );
       _cb( null );
     } );
   }
@@ -134,6 +135,7 @@ module.exports = function( _source ) {
   api.uninstall = function( _name , _cb ) {
     var addon = af_find( _name );
     if ( addon ) {
+      output.setup( addon.key , addon.name , addon.version );
       _uninstall( addon , _cb );
     } else {
       _cb( {err: -1 , desc: 'addon not found' } );

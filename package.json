@@ -1,6 +1,6 @@
 {
   "name": "wowam",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "WoW Addons Manager",
   "main": "index.js",
   "scripts": {
