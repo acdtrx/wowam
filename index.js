@@ -64,6 +64,12 @@ program
     } );
   } );
 
+program
+  .command( 'search' )
+  .action( ( _search , _options ) => {
+    addons.search( _search );
+  } );
+
 
 
 program.parse( process.argv );

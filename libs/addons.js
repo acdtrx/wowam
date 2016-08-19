@@ -146,6 +146,20 @@ module.exports = function( _source ) {
     _source.get_details( _name , _cb );
   }
 
+  api.search = function( _name , _cb ) {
+    _source.search( _name , ( _err , _results ) => {
+      if( _err ) {
+        return _cb( _err );
+      } else {
+        _results.forEach( ( _result ) => {
+          var addon = af_find( _result.key );
+          output.setup( _result.key , _result.name , (addon)?addon.version:'???' );
+          output.state( _result.key , (addon)?'Installed':'' );
+        } );
+      }
+    } );
+  }
+
   api.list = function( _cb ) {
     for( var i in addons_details ) {
       var addon = addons_details[ i ];

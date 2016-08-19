@@ -63,6 +63,27 @@ var api = {
       _cb( null , _addon );
     } );
     request( _addon.link ).pipe( output );
+  },
+
+  search: function( _name , _cb ) {
+    var search_page_url = 'https://mods.curse.com/search?game-slug=wow&search=' + _name;
+    request( search_page_url , ( _err , _response ) => {
+      if ( _response ) {
+        if ( _response.statusCode !== 200 ) {
+          // addon not found
+          return _cb( { code: -1 , desc: 'Error on server.' , link: search_page_url } );
+        } else {
+          var srcreg = /<a href="\/addons\/wow\/([^"]+)">([^<]+)<\/a>/g;
+          var results = [];
+          while( match = srcreg.exec( _response.text ) ) {
+            results.push( { key: match[1] , name: match[2] } );
+          }
+          return _cb( null , results );
+        }
+      } else {
+        return _cb( {code: -2 , desc: 'No response.' , link: search_page_url } );
+      }
+    } );
   }
 };
 
