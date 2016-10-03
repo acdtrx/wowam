@@ -1,5 +1,5 @@
 var fs = require( 'fs-extra' );
-var unzip = require( 'node-unzip-2' );
+var DecompressZip = require( 'decompress-zip' );
 var path = require( 'path' );
 var os = require( 'os' );
 var async = require( 'async' );
@@ -28,25 +28,34 @@ module.exports = function( _source ) {
   load_details( );
 
   function _extract( _zipfile , _cb ) {
-    var dirs = [];
-    fs.createReadStream( _zipfile )
-      .pipe( unzip.Parse() )
-      .on('entry' , ( _entry ) => {
-        if ( _entry.type === 'File' ) {
-          var output_filename = path.join( addons_path , _entry.path );
-          var addon_dir = _entry.path.split( path.sep )[0];
+    var unzipper = new DecompressZip( _zipfile )
+
+    unzipper.on('error', function ( _err ) {
+      _cb( _err );
+    });
+
+    unzipper.on('extract', ( _log ) => {
+      // get dirs list
+      var dirs = [];
+      var addon_dir = null;
+      _log.forEach( ( _entry ) => {
+        if ( 'folder' in _entry ) {
+          addon_dir = _entry.folder.split( path.sep )[0];
           if ( dirs.indexOf( addon_dir ) === -1 ) {
             dirs.push( addon_dir );
           }
-          fs.ensureDirSync( path.dirname( output_filename ) );
-          _entry.pipe( fs.createWriteStream( output_filename ) );
-        } else {
-          _entry.autodrain();
         }
-      } )
-      .on( 'close' , () => {
-        _cb( null , dirs );
       } );
+      _cb( null , dirs );
+    });
+
+    unzipper.on('progress', function (fileIndex, fileCount) {
+      // maybe do some progress
+    });
+
+    unzipper.extract({
+      path: addons_path
+    });
   }
 
   function _install( _addon , _cb ) {
