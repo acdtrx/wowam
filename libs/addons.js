@@ -39,11 +39,10 @@ module.exports = function( _source ) {
       var dirs = [];
       var addon_dir = null;
       _log.forEach( ( _entry ) => {
-        if ( 'folder' in _entry ) {
-          addon_dir = _entry.folder.split( path.sep )[0];
-          if ( dirs.indexOf( addon_dir ) === -1 ) {
-            dirs.push( addon_dir );
-          }
+        var obj_type = Object.keys( _entry )[0];
+        addon_dir = _entry[obj_type].split( path.sep )[0];
+        if ( dirs.indexOf( addon_dir ) === -1 ) {
+          dirs.push( addon_dir );
         }
       } );
       _cb( null , dirs );
